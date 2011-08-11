@@ -4,6 +4,7 @@ jQuery.ui extension for a numeric spinner
 Licensing
 ----------
 Modified by Mélanie Gauthier <mailto:mgauthier@trisotech.com> to allow no spin buttons 
+and free format of decimal values 
 
 Written by Brant Burnett <http://btburnett.com/> <mailto:btburnett3@gmail.com>
 Copyright (c) 2009-2010 Brant Burnett
@@ -62,6 +63,7 @@ constructor.  Page wide defaults can be assigned to $.ui.spinner.defaults.
 		
 	places (integer)
 		Number of decimal places to display.  Defaults to use the number of places found in step.
+		If you want any number of decimals to be allowed, set this to 'free'
 				
 	step (float)
 		A positive number that the spinner should be incremented by when up is clicked or pressed.
