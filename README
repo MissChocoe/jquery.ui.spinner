@@ -3,6 +3,7 @@ jQuery.ui extension for a numeric spinner
 
 Licensing
 ----------
+Modified by Mélanie Gauthier <mailto:mgauthier@trisotech.com> to allow no spin buttons 
 
 Written by Brant Burnett <http://btburnett.com/> <mailto:btburnett3@gmail.com>
 Copyright (c) 2009-2010 Brant Burnett
@@ -16,6 +17,8 @@ GNU Lesser General Public License for more details.
 Source Control
 ---------------
 
+This forked was created by MissChocoe and is hosted on GitHub at
+<http://github.com/MissChocoe/jquery.ui.spinner>
 The root branch for jQuery.ui.spinner is hosted on GitHub at
 <http://github.com/btburnett3/jquery.ui.spinner/>.
 
@@ -90,6 +93,7 @@ constructor.  Page wide defaults can be assigned to $.ui.spinner.defaults.
 		'focus': Spin buttons are only visible when the input has focus
 		'hover': Spin buttons are only visible when the mouse is hovering over the input
 		'both': Spin buttons are visible when the input has focus or is being hovered over
+		'never': Spin buttons will not be created, key control will still work.
 		
 	width (integer)
 		Width in pixels of the spinner.  Defaults to 16.
