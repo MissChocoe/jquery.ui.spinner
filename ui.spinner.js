@@ -109,7 +109,7 @@ $.widget('ui.spinner', {
 	},
 	
 	_createButtons: function(input) {
-		function getMargin(margin) {
+        function getMargin(margin) {
 			// IE8 returns auto if no margin specified
 			return margin == 'auto' ? 0 : parseInt(margin);
 		}
@@ -121,18 +121,21 @@ $.widget('ui.spinner', {
 			showOn = options.showOn,
 			box = $.support.boxModel,
 			height = input.outerHeight(),
-			rightMargin = self.oMargin = getMargin(input.css('margin-right')), // store original width and right margin for later destroy
-			wrapper = self.wrapper = input.css({ width: (self.oWidth = (box ? input.width() : input.outerWidth())) - buttonWidth, 
-												 marginRight: rightMargin + buttonWidth, textAlign: 'right' })
-				.after('<span class="ui-spinner ui-widget"></span>').next(),
-			btnContainer = self.btnContainer = $(
-				'<div class="ui-spinner-buttons">' + 
-					'<div class="ui-spinner-up ui-spinner-button ui-state-default ui-corner-tr"><span class="ui-icon '+options.upIconClass+'">&nbsp;</span></div>' + 
-					'<div class="ui-spinner-down ui-spinner-button ui-state-default ui-corner-br"><span class="ui-icon '+options.downIconClass+'">&nbsp;</span></div>' + 
-				'</div>'),
+			rightMargin = self.oMargin = getMargin(input.css('margin-right')); // store original width and right margin for later destroy
+            input.css({ textAlign: 'right' });
+            if (showOn != 'never') {             
+			    wrapper = self.wrapper = input.css({ width: (self.oWidth = (box ? input.width() : input.outerWidth())) - buttonWidth, 
+												     marginRight: rightMargin + buttonWidth})
+				    .after('<span class="ui-spinner ui-widget"></span>').next(),
+			    btnContainer = self.btnContainer = $(
+				    '<div class="ui-spinner-buttons">' + 
+					    '<div class="ui-spinner-up ui-spinner-button ui-state-default ui-corner-tr"><span class="ui-icon '+options.upIconClass+'">&nbsp;</span></div>' + 
+					    '<div class="ui-spinner-down ui-spinner-button ui-state-default ui-corner-br"><span class="ui-icon '+options.downIconClass+'">&nbsp;</span></div>' + 
+				    '</div>');
+            }
 
 			// object shortcuts
-			upButton, downButton, buttons, icons,
+			var upButton, downButton, buttons, icons,
 
 			hoverDelay,
 			hoverDelayCallback,
@@ -144,25 +147,27 @@ $.widget('ui.spinner', {
 			rtl = input[0].dir == 'rtl';
 		
 		// apply className before doing any calculations because it could affect them
-		if (className) wrapper.addClass(className);
+		if (className && typeof(wrapper) != 'undefined') wrapper.addClass(className);
 		
-		wrapper.append(btnContainer.css({ height: height, left: -buttonWidth-rightMargin,
-			// use offset calculation to fix vertical position in Firefox
-			top: (input.offset().top - wrapper.offset().top) + 'px' }));
-		
-		buttons = self.buttons = btnContainer.find('.ui-spinner-button');
-		buttons.css({ width: buttonWidth - (box ? buttons.outerWidth() - buttons.width() : 0), height: height/2 - (box ? buttons.outerHeight() - buttons.height() : 0) });
-		upButton = buttons[0];
-		downButton = buttons[1];
+        if (showOn != 'never') {
+		    wrapper.append(btnContainer.css({ height: height, left: -buttonWidth-rightMargin,
+			    // use offset calculation to fix vertical position in Firefox
+			    top: (input.offset().top - wrapper.offset().top) + 'px' }));
+		    
+		    buttons = self.buttons = btnContainer.find('div.ui-spinner-button');
+		    buttons.css({ width: buttonWidth - (box ? buttons.outerWidth() - buttons.width() : 0), height: height/2 - (box ? buttons.outerHeight() - buttons.height() : 0) });
+		    upButton = buttons[0];
+		    downButton = buttons[1];
 
-		// fix icon centering
-		icons = buttons.find('.ui-icon');
-		icons.css({ marginLeft: (buttons.innerWidth() - icons.width()) / 2, marginTop:  (buttons.innerHeight() - icons.height()) / 2 });
-		
-		// set width of btnContainer to be the same as the buttons
-		btnContainer.width(buttons.outerWidth());
-		if (showOn != 'always')
-			btnContainer.css('opacity', 0);
+		    // fix icon centering
+		    icons = buttons.find('span.ui-icon');
+		    icons.css({ marginLeft: (buttons.innerWidth() - icons.width()) / 2, marginTop:  (buttons.innerHeight() - icons.height()) / 2 });
+		    
+		    // set width of btnContainer to be the same as the buttons
+		    btnContainer.width(buttons.outerWidth());
+		    if (showOn != 'always')
+			    btnContainer.css('opacity', 0);
+        }
 		
 		/* Event Bindings */
 
@@ -186,20 +191,22 @@ $.widget('ui.spinner', {
 				});
 
 	
-		buttons.hover(function() {
-					// ensure that both buttons have hover removed, sometimes they get left on
-					self.buttons.removeClass(hover);
-					
-					if (!options.disabled)
-						$(this).addClass(hover);
-				}, function() {
-					$(this).removeClass(hover);
-				})
-			.mousedown(mouseDown)
-			.mouseup(mouseUp)
-			.mouseout(mouseUp);
+        if (buttons != null) {
+		    buttons.hover(function() {
+					    // ensure that both buttons have hover removed, sometimes they get left on
+					    self.buttons.removeClass(hover);
+					    
+					    if (!options.disabled)
+						    $(this).addClass(hover);
+				    }, function() {
+					    $(this).removeClass(hover);
+				    })
+			    .mousedown(mouseDown)
+			    .mouseup(mouseUp)
+			    .mouseout(mouseUp);
+        }
 			
-		if (msie)
+		if (msie && buttons != null)
 			// fixes dbl click not firing second mouse down in IE
 			buttons.dblclick(function() {
 					if (!options.disabled) {
@@ -257,8 +264,8 @@ $.widget('ui.spinner', {
 					if (dir) { // only process if dir was set above
 						if (!inKeyDown && !options.disabled) {
 							keyDir = dir;
-							
-							$(dir > 0 ? upButton : downButton).addClass(active);
+							 if (buttons != null)
+							    $(dir > 0 ? upButton : downButton).addClass(active);
 							inKeyDown = true;
 							self._startSpin(dir, large);
 						}
@@ -280,7 +287,8 @@ $.widget('ui.spinner', {
 						case down:
 						case left:
 						case pageDown:
-							buttons.removeClass(active)
+							if (buttons != null) 
+                                buttons.removeClass(active);
 							self._stopSpin();
 							inKeyDown = false;
 							return false;
@@ -372,7 +380,7 @@ $.widget('ui.spinner', {
 				inMouseDown = false;
 			}
 			return false;
-		}
+		}           
 	},
 	
 	_procOptions: function(init) {
@@ -397,7 +405,7 @@ $.widget('ui.spinner', {
 								 {count: 100, mult: 10, delay: 20},
 								 {count: 0, mult: 100, delay: 20}];
 
-		if ((min == null) && ((temp = input.attr('min')) != null))
+        if ((min == null) && ((temp = input.attr('min')) != null))
 			min = parseFloat(temp);
 		
 		if ((max == null) && ((temp = input.attr('max')) != null))
@@ -426,14 +434,16 @@ $.widget('ui.spinner', {
 		// only lookup input maxLength on init
 		if (init) self.inputMaxLength = input[0].maxLength;
 		temp = self.inputMaxLength;
-			
+
 		if (temp > 0) {
 			maxlength = maxlength > 0 ? Math.min(temp, maxlength) : temp;
 			temp = Math.pow(10, maxlength) - 1;
-			if ((max == null) || (max > temp))
+
+            // Infinity is a value assigned by IE in temp when it becomes to big or too small
+			if (((max == null) || (max > temp)) && temp != 'Infinity')
 				max = temp;
 			temp = -(temp + 1) / 10 + 1;
-			if ((min == null) || (min < temp))
+			if (((min == null) || (min < temp)) && temp != '-Infinity')
 				min = temp;
 		}
 		
@@ -442,7 +452,7 @@ $.widget('ui.spinner', {
 					
 		options.min = min;
 		options.max = max;
-		
+
 		// ensures that current value meets constraints
 		self._change();
 		
@@ -521,7 +531,7 @@ $.widget('ui.spinner', {
 		var self = this,
 			value = self.curvalue;
 			
-		if (value == null)
+		if (value == null) 
 			value = (step > 0 ? self.options.min : self.options.max) || 0;
 		
 		self._setValue(value + step);
@@ -639,7 +649,8 @@ $.widget('ui.spinner', {
 	},
 	
 	destroy: function(target) {
-		this.wrapper.remove();
+		if (typeof(this.wrapper) != 'undefined') 
+            this.wrapper.remove();
 		this.element.unbind(eventNamespace).css({ width: this.oWidth, marginRight: this.oMargin });
 		
 		$.Widget.prototype.destroy.call(this);
