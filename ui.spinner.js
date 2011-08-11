@@ -47,7 +47,7 @@ $.widget('ui.spinner', {
 		point: '.',
 		prefix: '',
 		suffix: '',
-		places: null, // null causes it to detect the number of places in step
+		places: null, // null causes it to detect the number of places in step, 'free' will let the user enters decimals as he wants
 		
 		defaultStep: 1, // real value is 'step', and should be passed as such.  This value is used to detect if passed value should override HTML5 attribute
 		largeStep: 10,
@@ -61,8 +61,12 @@ $.widget('ui.spinner', {
 		
 		format: function(num, places) {
 			var options = this,
-				regex = /(\d+)(\d{3})/,
-				result = ((isNaN(num) ? 0 : Math.abs(num)).toFixed(places)) + '';
+				regex = /(\d+)(\d{3})/;
+			var result;
+            if ('free' == places)
+                result = (isNaN(num) ? 0 : Math.abs(num)) + '';
+            else 
+                result = ((isNaN(num) ? 0 : Math.abs(num)).toFixed(places)) + '';
 				
 			for (result = result.replace('.', options.point); regex.test(result) && options.group; result=result.replace(regex, '$1'+options.group+'$2')) {};
 			return (num < 0 ? '-' : '') + options.prefix + result + options.suffix;
@@ -227,7 +231,7 @@ $.widget('ui.spinner', {
 					if (e.ctrl || e.alt) return true; // ignore these events
 					
 					if (isSpecialKey(keyCode))
-						inSpecialKey = true;
+						inSpecialKey = true;                    
 					
 					if (inKeyDown) return false; // only one direction at a time, and suppress invalid keys
 					
@@ -276,11 +280,12 @@ $.widget('ui.spinner', {
 				
 			.bind('keyup' + eventNamespace, function(e) {
 					if (e.ctrl || e.alt) return true; // ignore these events
-					
+					var keyCode = e.keyCode; // shortcut for minimization
+                    
 					if (isSpecialKey(keyCode))
-						inSpecialKey = false;
+						inSpecialKey = false; 
 					
-					switch (e.keyCode) {
+					switch (keyCode) {
 						case up:
 						case right:
 						case pageUp:
@@ -296,7 +301,7 @@ $.widget('ui.spinner', {
 				})
 				
 			.bind('keypress' + eventNamespace, function(e) {
-					if (invalidKey(e.keyCode, e.charCode)) return false;
+					if (invalidKey(e.keyCode, e.charCode, e.target)) return false;
 				})
 				
 			.bind('change' + eventNamespace, function() { self._change(); })
@@ -326,16 +331,17 @@ $.widget('ui.spinner', {
 			return false;
 		}
 			
-		function invalidKey(keyCode, charCode) {
-			if (inSpecialKey) return false;				
+		function invalidKey(keyCode, charCode, target) {
+            if (inSpecialKey) return false;				
 			
 			var ch = String.fromCharCode(charCode || keyCode),
 				options = self.options;
 				
 			if ((ch >= '0') && (ch <= '9') || (ch == '-')) return false;
-			if (((self.places > 0) && (ch == options.point))
+            // Allow the decimal separator if there's only one and we want decimals            
+			if (((self.places > 0 || self.places == 'free') && (ch == options.point) && ($(target).val() == null || $(target).val().indexOf(options.point) == -1))
 				|| (ch == options.group)) return false;
-						
+					
 			return true;
 		}
 		
