@@ -539,8 +539,25 @@ $.widget('ui.spinner', {
 			
 		if (value == null) 
 			value = (step > 0 ? self.options.min : self.options.max) || 0;
-		
-		self._setValue(value + step);
+		 if (self.options.places == 'free') {
+             // We may be in the floating problem! Lets stick with the number of decimals in the original value or in the step (max)
+             var point = self.options.point,
+                 result = value + step,
+                 strResult = result.toString(),
+                 strValue = value.toString(),
+                 strStep  = step.toString(),
+                 numDigitValue = (strValue.indexOf(point) == -1 ? 0 : strValue.length - strValue.indexOf(point) - 1), 
+                 numDigitStep =   (strStep.indexOf(point) == -1 ? 0 : strStep.length - strStep.indexOf(point) - 1), 
+                 desiredNumDigit = Math.max(numDigitValue, numDigitStep),
+                 numDigitResult = (strResult.indexOf(point) == -1 ? 0 : strResult.length - strResult.indexOf(point) - 1);                  
+             if (numDigitResult > desiredNumDigit)
+                self._setValue(result.toFixed(desiredNumDigit));
+             else 
+                self._setValue(result);
+             
+         } else {
+		    self._setValue(value + step);
+         }
 	},
 	
 	// Parse the value currently in the field
